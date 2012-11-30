@@ -15,9 +15,12 @@ describe "Authentication" do
     before { visit signin_path }
 
     describe "with invalid information" do
+      let(:user) { FactoryGirl.create(:user) }
       before { click_button "Sign in" }
 
       it { should have_selector('title', text: 'Sign in') }
+      it { should_not have_link('Profile',  href: user_path(user)) }
+      it { should_not have_link('Settings', href: edit_user_path(user)) }
       it { should have_selector('div.alert.alert-error', text: 'Invalid') }
 
 	  describe "after visiting another page" do
@@ -123,6 +126,19 @@ describe "Authentication" do
       describe "submitting a DELETE request to the Users#destroy action" do
         before { delete user_path(user) }
         specify { response.should redirect_to(root_path) }        
+      end
+    end
+
+    describe "in the Microposts controller" do
+
+      describe "submitting to the create action" do
+        before { post microposts_path }
+        specify { response.should redirect_to(signin_path) }
+      end
+
+      describe "submitting to the destroy action" do
+        before { delete micropost_path(FactoryGirl.create(:micropost)) }
+        specify { response.should redirect_to(signin_path) }
       end
     end
   end
